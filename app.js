@@ -18,8 +18,30 @@ function getUsers(cb){
 }
 
 app.get('/', (req,res) => {
-  
+  getUsers((err, users) => {
+    if (err) {
+      res.render('error', {error: err});
+    } else {
+      res.render('index', {title: "Users", users: users.users})
+    }
+  })
 }); 
+
+app.get('/:id', (req, res) => {
+  getUser(req.params.id, (err, user)=>{
+    if(err){
+      res.render('error', {error: err});
+    } else {
+      getFollowers(user, (err, followers) =>{
+        if(err){
+          res.render('error', {error: err});
+        } else {
+          res.render('profile', {title: "Profile Page", user: user, followers: followers});
+        }
+      }); 
+    }
+  });
+ });
 
 
 app.listen(3000, () => console.log('App listening on port 3000!'));
