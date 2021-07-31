@@ -8,6 +8,16 @@ app.set('view engine', 'pug');
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static('public'));
 
+function asyncHandler(cb) {
+    return async (req, res, next) => {
+      try {
+        await cb(req, res, next);
+      } catch (err) {
+        res.render('error', {error: err});
+      }
+    }
+}
+
 //CALL BACKS
 // function getUsers(cb){
 //   fs.readFile('data.json', 'utf8', (err, data) => {
@@ -46,7 +56,7 @@ app.use(express.static('public'));
 
 function getUsers() {
   return new Promise((resolve, reject) => {
-    fs.readFile('data.json', 'utf-8', (err, data) =>{
+    fs.readFile('data.json', 'utf-8', (err, data) => {
       if (err) {
         reject(err);
       } else {
@@ -68,14 +78,13 @@ function getUsers() {
 //     });
 // });
 
-app.get('/', async (req, res) => {
-  try {
-    const users = await getUsers();
-    res.render('index', {users:users.users, title: "Users"});
-  } catch (err) {
-    res.render('error', {error: err});
-  }
-})
+app.get('/', asyncHandler(async (req, res) => {
+
+  const users = await getUsers();
+  throw new Error("It broke!");
+  res.render('index', { users: users.users, title: "Users" });
+
+}))
 
 
 app.listen(3000, () => console.log('App listening on port 3000!'));
